@@ -75,6 +75,18 @@ Render binds the application to `0.0.0.0` using its provided `PORT`. Only one tr
 
 Deployment references: [Render Express guide](https://render.com/docs/deploy-node-express-app), [Render web services](https://render.com/docs/web-services), [Mongoose transaction API](<https://mongoosejs.com/docs/api/connection.html#Connection.prototype.transaction()>).
 
+## Deploy to Vercel
+
+The live deployment runs on Vercel. `api/index.js` serves the same Express app as a function, with one MongoDB connection per instance. `vercel.json` publishes Vite's build from `client/dist`, routes `/api/*` to the function, falls back to `index.html` for client routes, and applies the security headers Helmet sends. Functions run in Mumbai (`bom1`), next to the Atlas cluster.
+
+1. Import the repository in Vercel, or run `vercel link`. Build settings come from `vercel.json`. Pushes to `main` deploy to production.
+2. Add `MONGODB_URI` for Production and Preview. Don't add `NODE_ENV`: Vercel already runs functions in production mode, and setting it as a project variable makes `npm ci` skip the dev dependencies the build needs.
+3. Vercel functions have no fixed outbound IPs, so Atlas Network Access must allow `0.0.0.0/0`. Use a long random password for a database user scoped to `readWrite` on `campusslot`.
+4. Run `npm run seed` and `npm run create-staff` from your machine against the same Atlas database.
+5. The allowed origin is the production domain (the deployment URL on previews). For a custom domain, set `APP_ORIGIN` to its exact HTTPS origin.
+
+Rate limits are held in memory per function instance, so on Vercel they are approximate. Add a shared store if you need strict limits.
+
 ## API reference
 
 All responses are JSON. Errors use `{ "error": "human-readable message" }`. Mutating requests use `Content-Type: application/json` and the configured `Origin`. Authentication uses the session cookie, not localStorage.
@@ -101,6 +113,7 @@ Status values: `pending`, `approved`, `checked_out`, `returned`, `rejected`, `ca
 ## Project structure
 
 ```text
+api/index.js            Vercel function entry for the Express app
 client/src/              React interface, API client, responsive styles
 server/src/app.js       Express API, sessions, authorization, search
 server/src/models.js    MongoDB schemas and indexes
@@ -110,6 +123,7 @@ server/scripts/         Non-destructive seed and secure staff creation
 server/test/            Real MongoDB integration tests
 .github/workflows/      CI
 render.yaml             Render deployment blueprint
+vercel.json             Vercel build, routing, and security headers
 ```
 
 No Atlas credentials, staff credentials, or deployment keys belong in Git. `server/.env.example` documents the required configuration.
