@@ -1,3 +1,8 @@
+demo video link - https://drive.google.com/file/d/13_dvqAiPxlSnhfvjd4kqSR8ehsvUNWap/view?usp=sharing
+
+
+
+
 # CampusSlot
 
 A complete MERN campus equipment reservation platform. Students discover equipment and submit requests; staff approve requests, hand over equipment, record returns, and track overdue loans. React + Vite, Express + Node.js, MongoDB Atlas, GitHub, and Render.
