@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: campusslot-platform
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run seed && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: MONGODB_URI
+        sync: false
